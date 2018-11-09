@@ -34,11 +34,13 @@ class SQLObject
 
     columns.each do |column_name|
       define_method(column_name) do
-        instance_variable_get("@#{column_name}")
+        #instance_variable_get("@#{column_name}")
+        self.attributes[column_name]
       end
 
       define_method("#{column_name}=") do |value|
-        instance_variable_set("@#{column_name}", value)
+        #instance_variable_set("@#{column_name}", value)
+        self.attributes[column_name] = value
       end
     end
   end
@@ -66,6 +68,14 @@ class SQLObject
   def initialize(params = {})
     # ...
     # @attributes = {}
+    params.each do |name, value|
+      name = name.to_sym
+      if self.class.columns.include?(name)
+        self.send("#{name}=", value)
+      else
+        raise "unknown attribute '#{name}'"
+      end
+    end
   end
 
   def attributes
